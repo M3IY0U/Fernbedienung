@@ -8,52 +8,117 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main"
     android:orientation="vertical"
-    android:layout_margin="3dp">
-
+    android:layout_margin="3dp"
+    android:gravity="bottom">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="bottom"
+        android:paddingBottom="40dp"
+        android:paddingLeft="10dp">
+
+
         <ImageButton
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/button_rounded_square_blurple"
+            android:id="@+id/ratioLister"
+            android:onClick="toggleRatios"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/button_round_blurple"
             android:layout_margin="5dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_aspect_ratio_black_24dp"
             />
-        <ImageButton
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/button_rounded_square_blurple"
-            android:layout_margin="5dp"
-            />
-        <ImageButton
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/button_rounded_square_blurple"
-            android:layout_margin="5dp"
-            />
+        <LinearLayout
+            android:id="@+id/ratioButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="bottom"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/ratio1"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/button_rounded_square_blurple"
+                android:layout_margin="5dp"
+                />
+            <ImageButton
+                android:id="@+id/ratio2"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/button_rounded_square_blurple"
+                android:layout_margin="5dp"
+                />
+            <ImageButton
+                android:id="@+id/ratio3"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/button_rounded_square_blurple"
+                android:layout_margin="5dp"
+                />
+        </LinearLayout>
 
     </LinearLayout>
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingBottom="50dp"
+    android:layout_margin="5dp"
+    android:layout_gravity="center"
+    android:gravity="bottom"
+    >
+    <ImageButton
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
+        android:background="@drawable/button_round_blurple"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:rotation="180"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp">
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:onClick="startChannelList"
+        android:src="@drawable/baseline_list_alt_black_48"
+        android:background="@drawable/button_rounded_square_blurple"
+        />
+    </LinearLayout>
+    <ImageButton
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
+        android:background="@drawable/button_round_blurple"
+        android:backgroundTint="@color/colorPrimaryDark"/>
+</LinearLayout>
+
+
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:paddingBottom="20dp"
+        android:paddingBottom="30dp"
         >
         <ImageButton
             android:id="@+id/muteButton"
             android:onClick="toggleMute"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:background="@drawable/button_round_blurple"
-            android:src="@drawable/baseline_volume_off_black_36"
+            android:src="@drawable/baseline_volume_off_black_48"
             />
 
         <SeekBar
@@ -65,11 +130,10 @@
             android:min="0"
             android:max="100"
             android:progressTint="@color/colorPrimary"
-            android:progress="1"
+            android:progress="0"
             android:fadingEdge="horizontal"
             android:progressDrawable="@drawable/seekbar_background"
             android:maxHeight="8dp"
-
             />
         <TextView
             android:id="@+id/volumeDisplay"
