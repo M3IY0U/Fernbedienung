@@ -3,9 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.sundeep.timo.fernbedienung.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/settings_channelscan"
         android:onClick="startSettings"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="@string/settings_channelscan"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/settings_darkmode"
+        android:onClick="startSettings"
+        android:orderInCategory="100"
+        android:title="@string/settings_darkmode"
+        app:showAsAction="never"
+        android:checkable="true"/>
+    <item
+        android:id="@+id/settings_reset"
+        android:onClick="startSettings"
+        android:orderInCategory="100"
+        android:title="@string/settings_reset"
+        app:showAsAction="never"
+        />
 </menu>

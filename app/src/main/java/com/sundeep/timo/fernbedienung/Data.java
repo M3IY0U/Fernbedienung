@@ -4,6 +4,16 @@ public class Data {
 
     private int volume = 0;
 
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    private boolean paused = false;
+
     public int getPreMuteVolume() {
         return preMuteVolume;
     }
@@ -42,6 +52,17 @@ public class Data {
             volume=0;
         }
     }
+
+    public void togglePause(){
+        if(paused){
+            paused=false;
+        }else{
+            paused=true;
+        }
+
+    }
+
+
 
     private Data() {
 

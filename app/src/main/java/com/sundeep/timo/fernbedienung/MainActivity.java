@@ -17,11 +17,13 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     SeekBar volumeBar;
     TextView volumeDisplay;
     ImageButton muteButton;
+    ImageButton pauseButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         volumeDisplay = (TextView)findViewById(R.id.volumeDisplay);
         muteButton = (ImageButton)findViewById(R.id.muteButton);
+        pauseButton = (ImageButton) findViewById(R.id.pauseButton);
         updateVolumeText();
         volumeBar = (SeekBar)findViewById(R.id.volumeBar);
         //volumeBar.setLayoutParams(new LinearLayout.LayoutParams(this.getResources().getDisplayMetrics().widthPixels/2,25));
@@ -39,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 Data.getInstance().setVolume(progress);
                 Data.getInstance().setMuted(false);
-                muteButton.setImageResource(R.drawable.baseline_volume_up_black_48);
+                muteButton.setImageResource(R.drawable.ic_volume_up_black_24dp);
                 updateVolumeText();
             }
 
@@ -70,9 +73,9 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        //if (id == R.id.action_settings) {
+        //    return true;
+        //}
 
         return super.onOptionsItemSelected(item);
     }
@@ -80,13 +83,27 @@ public class MainActivity extends AppCompatActivity {
     public void toggleMute(View v){
         Data.getInstance().toggleMute();
         if(Data.getInstance().isMuted()){
-            muteButton.setImageResource(R.drawable.baseline_volume_off_black_48);
+            muteButton.setImageResource(R.drawable.ic_volume_off_black_24dp);
         }else{
-            muteButton.setImageResource(R.drawable.baseline_volume_up_black_48);
+            muteButton.setImageResource(R.drawable.ic_volume_up_black_24dp);
         }
         updateVolumeText();
     }
 
+    public void togglePause(View v){
+        Context context = getApplicationContext();
+        CharSequence text;
+        if(!Data.getInstance().isPaused()){
+            pauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+            text = "Programm wurde pausiert!";
+        }else{
+            pauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
+            text = "Programm wird fortgesetzt!";
+        }
+        Data.getInstance().togglePause();
+        Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+        toast.show();
+    }
 
     public void startSettings(MenuItem m){
         Intent i = new Intent(
