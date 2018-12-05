@@ -19,11 +19,16 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
     SeekBar volumeBar;
     TextView volumeDisplay;
     ImageButton muteButton;
     ImageButton pauseButton;
+    HttpRequest req;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         updateVolumeText();
         volumeBar = (SeekBar)findViewById(R.id.volumeBar);
         //volumeBar.setLayoutParams(new LinearLayout.LayoutParams(this.getResources().getDisplayMetrics().widthPixels/2,25));
+
+        req = new HttpRequest("172.16.206.140","8080",1000,true);
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -111,6 +118,22 @@ public class MainActivity extends AppCompatActivity {
                 SettingsActivity.class);
         startActivity(i);
 
+    }
+
+    public void togglePower(View v){
+        ImageButton pwrbtn = findViewById(R.id.powerButton);
+        String command= "standby=1";
+        if(Data.getInstance().isOn()){
+            command = "standby=0";
+        }
+        try {
+            req.execute(command);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Data.getInstance().setOn(!Data.getInstance().isOn());
     }
 
     public void startChannelList(View v){

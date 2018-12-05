@@ -4,6 +4,16 @@ public class Data {
 
     private int volume = 0;
 
+    public boolean isOn() {
+        return on;
+    }
+
+    public void setOn(boolean on) {
+        this.on = on;
+    }
+
+    private boolean on = false;
+
     public boolean isPaused() {
         return paused;
     }

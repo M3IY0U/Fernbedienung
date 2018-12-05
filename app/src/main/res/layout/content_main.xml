@@ -12,19 +12,21 @@
     android:gravity="bottom">
 
     <LinearLayout
-        android:paddingTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="top|center"
-        android:layout_weight="1">
+        android:paddingTop="10dp">
+
         <ImageButton
             android:id="@+id/powerButton"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:onClick="togglePower"
             android:background="@drawable/button_round_blurple"
+            android:backgroundTint="@color/colorPowerRed"
             android:src="@drawable/ic_power_settings_new_black_24dp"
-            android:tint="@color/colorTextLight"
-            android:backgroundTint="@color/colorPowerRed"/>
+            android:tint="@color/colorTextLight" />
 
     </LinearLayout>
 

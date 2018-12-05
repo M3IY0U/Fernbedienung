@@ -20,6 +20,7 @@
         <ImageButton
             android:id="@+id/powerButton"
             android:layout_width="80dp"
+            android:onClick="togglePower"
             android:layout_height="80dp"
             android:background="@drawable/button_round_blurple"
             android:src="@drawable/ic_power_settings_new_black_24dp"
