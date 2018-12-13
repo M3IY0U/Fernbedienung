@@ -3,4 +3,6 @@
     <string name="settings_channelscan">Kanal Scan</string>
     <string name="settings_darkmode">Dark Mode</string>
     <string name="settings_reset">Reset</string>
+    <string name="fernseher_ip">Fernseher IP eintragen</string>
+    <string name="preferences">com.sundeep.timo.fernbedienung.preferences</string>
 </resources>

@@ -1,10 +1,12 @@
 package com.sundeep.timo.fernbedienung;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -13,22 +15,27 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
     SeekBar volumeBar;
     TextView volumeDisplay;
     ImageButton muteButton;
     ImageButton pauseButton;
-    HttpRequest req;
+    public HttpRequest req;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         volumeBar = (SeekBar)findViewById(R.id.volumeBar);
         //volumeBar.setLayoutParams(new LinearLayout.LayoutParams(this.getResources().getDisplayMetrics().widthPixels/2,25));
 
-        req = new HttpRequest("172.16.206.140","8080",1000,true);
+        req = new HttpRequest(Data.getInstance().getIp(),"8080",25000,true);
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -63,6 +70,21 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        Data.getInstance().save(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        Data.getInstance().restore(this);
+        volumeBar.setProgress(Data.getInstance().getVolume());
+        updateVolumeText();
+        req.ipAddress = Data.getInstance().getIp();
+        super.onResume();
     }
 
     @Override
@@ -120,6 +142,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void enterIp(MenuItem m){
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setTitle("Bitte tragen sie eine gültige IP ein");
+        final EditText input = new EditText(this);
+        b.setView(input);
+        input.setText(Data.getInstance().getIp());
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Data.getInstance().setIp(input.getText().toString());
+                req.ipAddress = input.getText().toString();
+            }
+        });
+        b.setNegativeButton("CANCEL",null);
+        b.show();
+    }
+
     public void togglePower(View v){
         ImageButton pwrbtn = findViewById(R.id.powerButton);
         String command= "standby=1";
@@ -136,7 +175,54 @@ public class MainActivity extends AppCompatActivity {
         Data.getInstance().setOn(!Data.getInstance().isOn());
     }
 
+    public void channelSearch(MenuItem m){
+        JSONObject response = null;
+        try {
+            response = req.sendHttp("scanChannels=");
+
+        JSONArray channels = response.getJSONArray("channels");
+        ArrayList<Channel> channelArrayList = new ArrayList<>();
+        for(int i = 0; i < channels.length(); ++i){
+            JSONObject jsonChannel = channels.getJSONObject(i);
+            Channel channel = new Channel();
+            channel.setChannel(jsonChannel.getString("channel"));
+            channel.setFrequency(jsonChannel.getInt("frequency"));
+            channel.setProgram(jsonChannel.getString("program"));
+            channel.setProvider(jsonChannel.getString("provider"));
+            channel.setQuality(jsonChannel.getInt("quality"));
+            boolean dupe = false;
+            for(int j = 0; j < channelArrayList.size(); ++j){
+                if(channel.getProgram()==channelArrayList.get(j).getProgram()){
+                    dupe = true;
+                    if(channelArrayList.get(j).getQuality()<channel.getQuality()){
+                        channelArrayList.set(j,channel);
+                    }
+                }
+            }
+            if(!dupe)
+                channelArrayList.add(channel);
+
+        }
+
+        Data.getInstance().setChannels(channelArrayList);
+        Data.getInstance().setCurrentChannelIndex(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void startChannelList(View v){
+        if(Data.getInstance().getChannels()==null){
+            Context context = getApplicationContext();
+            Data.getInstance().togglePause();
+            Toast toast = Toast.makeText(context,"Es wurde noch kein Channelscan durchgeführt!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
         Intent i = new Intent(
                 this,
                 ChannelListActivity.class
@@ -146,17 +232,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void toggleRatios(View v){
         LinearLayout ratios = findViewById(R.id.ratioButtons);
-        ImageButton lister = findViewById(R.id.ratioLister);
-
         if(ratios.getVisibility()==View.GONE){
-            for (int i = 1;i<46;i++){
-                lister.setRotation(i);
-            }
             expand(ratios,1);
         }else {
-            for (int i = 45;i>0;i--){
-                lister.setRotation(i);
-            }
             collapse(ratios,1);
         }
     }

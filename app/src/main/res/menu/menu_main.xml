@@ -4,7 +4,7 @@
     tools:context="com.sundeep.timo.fernbedienung.MainActivity">
     <item
         android:id="@+id/settings_channelscan"
-        android:onClick="startSettings"
+        android:onClick="channelSearch"
         android:orderInCategory="100"
         android:title="@string/settings_channelscan"
         app:showAsAction="never" />
@@ -22,4 +22,12 @@
         android:title="@string/settings_reset"
         app:showAsAction="never"
         />
+    <item
+        android:id="@+id/ipEintragen"
+        android:onClick="enterIp"
+        android:title="@string/fernseher_ip"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
 </menu>
