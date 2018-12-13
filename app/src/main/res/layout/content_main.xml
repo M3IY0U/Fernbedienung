@@ -29,7 +29,17 @@
             android:tint="@color/colorTextLight" />
 
     </LinearLayout>
-
+    <TextView
+        android:id="@+id/currentChannel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="AAAAAAAAAAAAAAAAAA"
+        android:textSize="28dp"
+        android:textAlignment="center"
+        android:textColor="@color/colorTextLight"
+        android:layout_weight="0.2"
+        android:layout_gravity="center"
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -142,6 +152,7 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_gravity="center"
+        android:onClick="prevChannel"
         android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
         android:background="@drawable/button_round_blurple"
         android:backgroundTint="@color/colorPrimaryDark"
@@ -165,6 +176,7 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_gravity="center"
+        android:onClick="nextChannel"
         android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
         android:background="@drawable/button_round_blurple"
         android:backgroundTint="@color/colorPrimaryDark"

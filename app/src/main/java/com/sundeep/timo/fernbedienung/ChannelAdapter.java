@@ -10,11 +10,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> {
     private ArrayList<Channel> dataSet;
-
+    private HttpRequest req;
 
     public ChannelAdapter(ArrayList<Channel> dataSet) {
         this.dataSet = dataSet;
@@ -30,8 +33,23 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
     @Override
     public void onBindViewHolder(@NonNull ChannelViewHolder holder, int position) {
-        Channel channel = dataSet.get(position);
+        final Channel channel = dataSet.get(position);
         holder.channelName.setText(channel.getProgram());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                req = new HttpRequest(Data.getInstance().getIp(),"8080",25000,true);
+                try {
+                    Data.getInstance().setCurrentChannelIndex(Data.getInstance().getChannels().indexOf(channel));
+                    req.execute("channelMain=" + channel.getChannel());
+                    MainActivity.updateChannelText();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         if(channel.isFavorited()) {
             holder.favIcon.setColorFilter(Color.argb(255, 255, 255,255));
         } else {

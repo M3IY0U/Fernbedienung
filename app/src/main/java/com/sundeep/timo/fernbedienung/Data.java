@@ -52,6 +52,16 @@ public class Data {
         channels = channels != null ? channels : new ArrayList<Channel>();
     }
 
+    public void reset(){
+        ip=null;
+        muted = false;
+        volume =0;
+        paused = false;
+        currentChannelIndex = -1;
+        channels = null;
+        pictureInPictureChannel = null;
+    }
+
 
     private <T extends Object> T toObject(String json, Class<T> targetClass) {
         if (json == null) {

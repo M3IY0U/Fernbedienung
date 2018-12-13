@@ -33,6 +33,7 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity {
     SeekBar volumeBar;
     TextView volumeDisplay;
+    static TextView currentChannel;
     ImageButton muteButton;
     ImageButton pauseButton;
     public HttpRequest req;
@@ -43,14 +44,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        volumeDisplay = (TextView)findViewById(R.id.volumeDisplay);
-        muteButton = (ImageButton)findViewById(R.id.muteButton);
+        volumeDisplay = (TextView) findViewById(R.id.volumeDisplay);
+        muteButton = (ImageButton) findViewById(R.id.muteButton);
+        currentChannel = findViewById(R.id.currentChannel);
         pauseButton = (ImageButton) findViewById(R.id.pauseButton);
         updateVolumeText();
-        volumeBar = (SeekBar)findViewById(R.id.volumeBar);
+        updateChannelText();
+        volumeBar = (SeekBar) findViewById(R.id.volumeBar);
         //volumeBar.setLayoutParams(new LinearLayout.LayoutParams(this.getResources().getDisplayMetrics().widthPixels/2,25));
 
-        req = new HttpRequest(Data.getInstance().getIp(),"8080",25000,true);
+        req = new HttpRequest(Data.getInstance().getIp(), "8080", 25000, true);
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -67,7 +70,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                try {
+                    req.sendHttp("volume=" + Integer.toString(Data.getInstance().getVolume()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -109,23 +118,66 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void toggleMute(View v){
+    public void toggleMute(View v) {
         Data.getInstance().toggleMute();
-        if(Data.getInstance().isMuted()){
+        if (Data.getInstance().isMuted()) {
             muteButton.setImageResource(R.drawable.ic_volume_off_black_24dp);
-        }else{
+            try {
+                req.sendHttp("volume=0");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
             muteButton.setImageResource(R.drawable.ic_volume_up_black_24dp);
+            try {
+
+                req.sendHttp("volume="+ Integer.toString(Data.getInstance().getPreMuteVolume()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         updateVolumeText();
     }
 
-    public void togglePause(View v){
+
+    public void killTv(MenuItem m) {
+        try {
+            req.sendHttp("powerOff=");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void toggleDebug(MenuItem m) {
+        try {
+            if (m.isChecked()) {
+                req.sendHttp("debug=0");
+                m.setChecked(false);
+            } else {
+                req.sendHttp("debug=1");
+                m.setChecked(true);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void togglePause(View v) {
         Context context = getApplicationContext();
         CharSequence text;
-        if(!Data.getInstance().isPaused()){
+        if (!Data.getInstance().isPaused()) {
             pauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
             text = "Programm wurde pausiert!";
-        }else{
+        } else {
             pauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
             text = "Programm wird fortgesetzt!";
         }
@@ -134,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         toast.show();
     }
 
-    public void startSettings(MenuItem m){
+    public void startSettings(MenuItem m) {
         Intent i = new Intent(
                 this,
                 SettingsActivity.class);
@@ -142,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void enterIp(MenuItem m){
+    public void enterIp(MenuItem m) {
         AlertDialog.Builder b = new AlertDialog.Builder(this);
         b.setTitle("Bitte tragen sie eine gültige IP ein");
         final EditText input = new EditText(this);
@@ -155,14 +207,14 @@ public class MainActivity extends AppCompatActivity {
                 req.ipAddress = input.getText().toString();
             }
         });
-        b.setNegativeButton("CANCEL",null);
+        b.setNegativeButton("CANCEL", null);
         b.show();
     }
 
-    public void togglePower(View v){
+    public void togglePower(View v) {
         ImageButton pwrbtn = findViewById(R.id.powerButton);
-        String command= "standby=1";
-        if(Data.getInstance().isOn()){
+        String command = "standby=1";
+        if (Data.getInstance().isOn()) {
             command = "standby=0";
         }
         try {
@@ -175,37 +227,36 @@ public class MainActivity extends AppCompatActivity {
         Data.getInstance().setOn(!Data.getInstance().isOn());
     }
 
-    public void channelSearch(MenuItem m){
-        JSONObject response = null;
+    public void channelSearch(MenuItem m) {
+        JSONObject response;
         try {
             response = req.sendHttp("scanChannels=");
 
-        JSONArray channels = response.getJSONArray("channels");
-        ArrayList<Channel> channelArrayList = new ArrayList<>();
-        for(int i = 0; i < channels.length(); ++i){
-            JSONObject jsonChannel = channels.getJSONObject(i);
-            Channel channel = new Channel();
-            channel.setChannel(jsonChannel.getString("channel"));
-            channel.setFrequency(jsonChannel.getInt("frequency"));
-            channel.setProgram(jsonChannel.getString("program"));
-            channel.setProvider(jsonChannel.getString("provider"));
-            channel.setQuality(jsonChannel.getInt("quality"));
-            boolean dupe = false;
-            for(int j = 0; j < channelArrayList.size(); ++j){
-                if(channel.getProgram()==channelArrayList.get(j).getProgram()){
-                    dupe = true;
-                    if(channelArrayList.get(j).getQuality()<channel.getQuality()){
-                        channelArrayList.set(j,channel);
+            JSONArray channels = response.getJSONArray("channels");
+            ArrayList<Channel> channelArrayList = new ArrayList<>();
+            for (int i = 0; i < channels.length(); ++i) {
+                JSONObject jsonChannel = channels.getJSONObject(i);
+                Channel channel = new Channel();
+                channel.setChannel(jsonChannel.getString("channel"));
+                channel.setFrequency(jsonChannel.getInt("frequency"));
+                channel.setProgram(jsonChannel.getString("program"));
+                channel.setProvider(jsonChannel.getString("provider"));
+                channel.setQuality(jsonChannel.getInt("quality"));
+                boolean dupe = false;
+                for (int j = 0; j < channelArrayList.size(); ++j) {
+                    if (channel.getProgram() == channelArrayList.get(j).getProgram()) {
+                        dupe = true;
+                        if (channelArrayList.get(j).getQuality() < channel.getQuality()) {
+                            channelArrayList.set(j, channel);
+                        }
                     }
                 }
+                if (!dupe)
+                    channelArrayList.add(channel);
             }
-            if(!dupe)
-                channelArrayList.add(channel);
 
-        }
-
-        Data.getInstance().setChannels(channelArrayList);
-        Data.getInstance().setCurrentChannelIndex(0);
+            Data.getInstance().setChannels(channelArrayList);
+            Data.getInstance().setCurrentChannelIndex(0);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -213,12 +264,36 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void nextChannel(View view) {
+        if (Data.getInstance().getNextChannel() != null) {
+            try {
+                req.sendHttp("channelMain=" + Data.getInstance().getNextChannel().getChannel());
+                updateChannelText();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-    public void startChannelList(View v){
-        if(Data.getInstance().getChannels()==null){
-            Context context = getApplicationContext();
+    public void prevChannel(View view) {
+        if (Data.getInstance().getPreviousChannel() != null) {
+            try {
+                req.execute("channelMain=" + Data.getInstance().getPreviousChannel().getChannel());
+                updateChannelText();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void startChannelList(View v) {
+        if (Data.getInstance().getChannels() == null) {
             Data.getInstance().togglePause();
-            Toast toast = Toast.makeText(context,"Es wurde noch kein Channelscan durchgeführt!", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getApplicationContext(), "Es wurde noch kein Channelscan durchgeführt!", Toast.LENGTH_SHORT);
             toast.show();
             return;
         }
@@ -230,20 +305,31 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    public void toggleRatios(View v){
+    public void reset(MenuItem m) {
+        Data.getInstance().reset();
+    }
+
+    public void toggleRatios(View v) {
         LinearLayout ratios = findViewById(R.id.ratioButtons);
-        if(ratios.getVisibility()==View.GONE){
-            expand(ratios,1);
-        }else {
-            collapse(ratios,1);
+        if (ratios.getVisibility() == View.GONE) {
+            expand(ratios, 1);
+        } else {
+            collapse(ratios, 1);
         }
     }
 
 
-    private void updateVolumeText(){
+    private void updateVolumeText() {
         volumeDisplay.setText(Integer.toString(Data.getInstance().getVolume()));
     }
 
+    public static void updateChannelText() {
+        if (Data.getInstance().getCurrentChannel() != null) {
+            currentChannel.setText(Data.getInstance().getCurrentChannel().getProgram());
+        } else {
+            currentChannel.setText("Kein Kanal gewählt");
+        }
+    }
 
     public static void expand(final View view, int durationMultiplier) {
         if (view.getVisibility() == View.GONE) {

@@ -5,4 +5,6 @@
     <string name="settings_reset">Reset</string>
     <string name="fernseher_ip">Fernseher IP eintragen</string>
     <string name="preferences">com.sundeep.timo.fernbedienung.preferences</string>
+    <string name="kill_tv">Fernseher killen</string>
+    <string name="debug_mode">Debug Modus</string>
 </resources>
