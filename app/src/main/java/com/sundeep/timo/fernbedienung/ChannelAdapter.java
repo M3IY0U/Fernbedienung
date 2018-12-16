@@ -38,16 +38,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                req = new HttpRequest(Data.getInstance().getIp(),"8080",25000,true);
-                try {
                     Data.getInstance().setCurrentChannelIndex(Data.getInstance().getChannels().indexOf(channel));
-                    req.execute("channelMain=" + channel.getChannel());
+                    HttpRequestAsync d = new HttpRequestAsync();
+                    d.execute("channelMain=" + channel.getChannel());
                     MainActivity.updateChannelText();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
             }
         });
         if(channel.isFavorited()) {

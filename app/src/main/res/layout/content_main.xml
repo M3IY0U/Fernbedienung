@@ -101,27 +101,32 @@
             android:visibility="gone">
 
             <ImageButton
-                android:id="@+id/ratio1"
+                android:id="@+id/ratioC"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:background="@drawable/button_rounded_square_blurple"
                 android:backgroundTint="@color/colorPrimaryDark"
+                android:src="@drawable/baseline_tv_cinemascope_black_48"
+                android:onClick="ratioCinema"
                 />
             <ImageButton
-                android:id="@+id/ratio2"
+                android:id="@+id/ratio16"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:background="@drawable/button_rounded_square_blurple"
                 android:layout_margin="32dp"
                 android:backgroundTint="@color/colorPrimaryDark"
+                android:src="@drawable/baseline_tv_black_48"
+                android:onClick="ratio16to9"
                 />
             <ImageButton
-                android:id="@+id/ratio3"
+                android:id="@+id/ratio4"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:background="@drawable/button_rounded_square_blurple"
                 android:backgroundTint="@color/colorPrimaryDark"
-
+                android:src="@drawable/baseline_tv_4to3_black_48"
+                android:onClick="ratio4to3"
                 />
         </LinearLayout>
 

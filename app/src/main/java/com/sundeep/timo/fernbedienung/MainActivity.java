@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     static TextView currentChannel;
     ImageButton muteButton;
     ImageButton pauseButton;
-    public HttpRequest req;
+    HttpRequestAsync reqA;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
         updateChannelText();
         volumeBar = (SeekBar) findViewById(R.id.volumeBar);
         //volumeBar.setLayoutParams(new LinearLayout.LayoutParams(this.getResources().getDisplayMetrics().widthPixels/2,25));
-
-        req = new HttpRequest(Data.getInstance().getIp(), "8080", 25000, true);
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -70,13 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                try {
-                    req.sendHttp("volume=" + Integer.toString(Data.getInstance().getVolume()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                reqA = new HttpRequestAsync();
+                reqA.execute("volume=" + Integer.toString(Data.getInstance().getVolume()));
             }
         });
     }
@@ -92,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
         Data.getInstance().restore(this);
         volumeBar.setProgress(Data.getInstance().getVolume());
         updateVolumeText();
-        req.ipAddress = Data.getInstance().getIp();
         super.onResume();
     }
 
@@ -120,53 +112,31 @@ public class MainActivity extends AppCompatActivity {
 
     public void toggleMute(View v) {
         Data.getInstance().toggleMute();
+        reqA = new HttpRequestAsync();
         if (Data.getInstance().isMuted()) {
             muteButton.setImageResource(R.drawable.ic_volume_off_black_24dp);
-            try {
-                req.sendHttp("volume=0");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reqA.execute("volume=0");
         } else {
             muteButton.setImageResource(R.drawable.ic_volume_up_black_24dp);
-            try {
-
-                req.sendHttp("volume="+ Integer.toString(Data.getInstance().getPreMuteVolume()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reqA.execute("volume=" + Integer.toString(Data.getInstance().getPreMuteVolume()));
         }
         updateVolumeText();
     }
 
 
     public void killTv(MenuItem m) {
-        try {
-            req.sendHttp("powerOff=");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        reqA = new HttpRequestAsync();
+        reqA.execute("powerOff=");
     }
 
     public void toggleDebug(MenuItem m) {
-        try {
-            if (m.isChecked()) {
-                req.sendHttp("debug=0");
-                m.setChecked(false);
-            } else {
-                req.sendHttp("debug=1");
-                m.setChecked(true);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        reqA = new HttpRequestAsync();
+        if (m.isChecked()) {
+            reqA.execute("debug=0");
+            m.setChecked(false);
+        } else {
+            reqA.execute("debug=1");
+            m.setChecked(true);
         }
     }
 
@@ -204,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Data.getInstance().setIp(input.getText().toString());
-                req.ipAddress = input.getText().toString();
             }
         });
         b.setNegativeButton("CANCEL", null);
@@ -217,76 +186,27 @@ public class MainActivity extends AppCompatActivity {
         if (Data.getInstance().isOn()) {
             command = "standby=0";
         }
-        try {
-            req.execute(command);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        reqA = new HttpRequestAsync();
+        reqA.execute(command);
         Data.getInstance().setOn(!Data.getInstance().isOn());
     }
 
     public void channelSearch(MenuItem m) {
-        JSONObject response;
-        try {
-            response = req.sendHttp("scanChannels=");
-
-            JSONArray channels = response.getJSONArray("channels");
-            ArrayList<Channel> channelArrayList = new ArrayList<>();
-            for (int i = 0; i < channels.length(); ++i) {
-                JSONObject jsonChannel = channels.getJSONObject(i);
-                Channel channel = new Channel();
-                channel.setChannel(jsonChannel.getString("channel"));
-                channel.setFrequency(jsonChannel.getInt("frequency"));
-                channel.setProgram(jsonChannel.getString("program"));
-                channel.setProvider(jsonChannel.getString("provider"));
-                channel.setQuality(jsonChannel.getInt("quality"));
-                boolean dupe = false;
-                for (int j = 0; j < channelArrayList.size(); ++j) {
-                    if (channel.getProgram() == channelArrayList.get(j).getProgram()) {
-                        dupe = true;
-                        if (channelArrayList.get(j).getQuality() < channel.getQuality()) {
-                            channelArrayList.set(j, channel);
-                        }
-                    }
-                }
-                if (!dupe)
-                    channelArrayList.add(channel);
-            }
-
-            Data.getInstance().setChannels(channelArrayList);
-            Data.getInstance().setCurrentChannelIndex(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        reqA = new HttpRequestAsync();
+        reqA.execute("scanChannels=");
     }
 
     public void nextChannel(View view) {
         if (Data.getInstance().getNextChannel() != null) {
-            try {
-                req.sendHttp("channelMain=" + Data.getInstance().getNextChannel().getChannel());
-                updateChannelText();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reqA = new HttpRequestAsync();
+            reqA.execute("channelMain=" + Data.getInstance().getNextChannel().getChannel());
         }
     }
 
     public void prevChannel(View view) {
         if (Data.getInstance().getPreviousChannel() != null) {
-            try {
-                req.execute("channelMain=" + Data.getInstance().getPreviousChannel().getChannel());
-                updateChannelText();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reqA = new HttpRequestAsync();
+            reqA.execute("channelMain=" + Data.getInstance().getPreviousChannel().getChannel());
         }
     }
 
@@ -303,6 +223,30 @@ public class MainActivity extends AppCompatActivity {
                 ChannelListActivity.class
         );
         startActivity(i);
+    }
+
+    public void ratioCinema(View v) {
+        if (!Data.getInstance().getRatio().equals("2.35:1")) {
+            reqA = new HttpRequestAsync();
+            Data.getInstance().setRatio("2.35:1");
+            reqA.execute("zoomMain=1");
+        }
+    }
+
+    public void ratio4to3(View v) {
+        if (!Data.getInstance().getRatio().equals("4:3")) {
+            reqA = new HttpRequestAsync();
+            Data.getInstance().setRatio("4:3");
+            reqA.execute("zoomMain=1");
+        }
+    }
+
+    public void ratio16to9(View v) {
+        if (!Data.getInstance().getRatio().equals("16:9")) {
+            reqA = new HttpRequestAsync();
+            Data.getInstance().setRatio("16:9");
+            reqA.execute("zoomMain=0");
+        }
     }
 
     public void reset(MenuItem m) {

@@ -25,6 +25,7 @@ public class Data {
     private int preMuteVolume;
     private ArrayList<Channel> channels;
     private Channel pictureInPictureChannel;
+    private String ratio = "16:9";
 
     private int currentChannelIndex = -1;
 
@@ -191,5 +192,11 @@ public class Data {
             paused=true;
         }
 
+    }
+    public String getRatio() {
+        return ratio;
+    }
+    public void setRatio(String ratio) {
+        this.ratio = ratio;
     }
 }
