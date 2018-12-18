@@ -48,6 +48,8 @@
         android:paddingBottom="20dp">
         <ImageButton
             android:layout_gravity="start"
+            android:id="@+id/pipButton"
+            android:onClick="togglePip"
             android:layout_width="90dp"
             android:layout_height="70dp"
             android:background="@drawable/button_rounded_square_blurple"

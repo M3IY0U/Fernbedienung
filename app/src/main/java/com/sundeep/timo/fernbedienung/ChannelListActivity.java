@@ -30,5 +30,15 @@ public class ChannelListActivity extends AppCompatActivity {
         channelRecyclerView.setAdapter(channelAdapter);
     }
 
+    @Override
+    protected void onPause() {
+        Data.getInstance().save(this);
+        super.onPause();
+    }
 
+    @Override
+    protected void onResume() {
+        Data.getInstance().restore(this);
+        super.onResume();
+    }
 }

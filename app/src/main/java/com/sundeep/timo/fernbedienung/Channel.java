@@ -12,8 +12,18 @@ public class Channel {
 
     }
 
+/*
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) {
+            return false;
+        }
+        Channel test = (Channel)obj;
+        return test.getChannel().equals(this.channel);
+    }
+*/
 
-    public boolean isFavorited() {
+    public boolean isFavorite() {
         return favorited;
     }
 

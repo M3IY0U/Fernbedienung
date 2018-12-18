@@ -142,27 +142,23 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void togglePause(View v) {
+        reqA = new HttpRequestAsync();
         Context context = getApplicationContext();
         CharSequence text;
         if (!Data.getInstance().isPaused()) {
             pauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
             text = "Programm wurde pausiert!";
+            reqA.execute("timeShiftPause=");
         } else {
             pauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
             text = "Programm wird fortgesetzt!";
+            reqA.execute("timeShiftPlay=0"); //Keine Ahnung wie das genau sein muss
         }
         Data.getInstance().togglePause();
         Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
         toast.show();
     }
 
-    public void startSettings(MenuItem m) {
-        Intent i = new Intent(
-                this,
-                SettingsActivity.class);
-        startActivity(i);
-
-    }
 
     public void enterIp(MenuItem m) {
         AlertDialog.Builder b = new AlertDialog.Builder(this);
@@ -195,6 +191,27 @@ public class MainActivity extends AppCompatActivity {
         reqA = new HttpRequestAsync();
         reqA.execute("scanChannels=");
     }
+
+
+    public void togglePip(View v){
+        reqA = new HttpRequestAsync();
+        if(Data.getInstance().getPictureInPictureChannel()==null){
+            Data.getInstance().setPictureInPictureChannel(Data.getInstance().getCurrentChannel());
+            reqA.execute("showPip=1");
+            reqA = new HttpRequestAsync();
+            reqA.execute("channelPip="+Data.getInstance().getCurrentChannel().getChannel());
+            reqA =  new HttpRequestAsync();
+            if(Data.getInstance().getRatio()!="16:9"){
+                reqA.execute("zoomPip=1");
+            }else{
+                reqA.execute("zoomPip=0");
+            }
+        }else{
+            Data.getInstance().setPictureInPictureChannel(null);
+            reqA.execute("showPip=0");
+        }
+    }
+
 
     public void nextChannel(View view) {
         if (Data.getInstance().getNextChannel() != null) {
@@ -248,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
             reqA.execute("zoomMain=0");
         }
     }
+
 
     public void reset(MenuItem m) {
         Data.getInstance().reset();

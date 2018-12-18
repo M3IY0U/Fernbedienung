@@ -108,6 +108,18 @@ public class Data {
         return channels.get(currentChannelIndex);
     }
 
+    public void setCurrentChannel(String c){
+        String test;
+        for(int i =0;i<channels.size();i++){
+            test = channels.get(i).getChannel();
+            if(test.equals(c)){
+                setCurrentChannelIndex(i);
+                break;
+            }
+        }
+    }
+
+
     public Channel getNextChannel() {
         if(currentChannelIndex < 0) {
             return null;
