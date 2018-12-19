@@ -1,6 +1,7 @@
 package com.sundeep.timo.fernbedienung;
 
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,9 +28,20 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ChannelViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ChannelViewHolder holder, int position) {
         final Channel channel = dataSet.get(position);
         holder.channelName.setText(channel.getProgram());
+        holder.favIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                channel.setFavorited(!channel.isFavorite());
+                if (!channel.isFavorite()) {
+                    holder.favIcon.setColorFilter(Color.YELLOW);
+                }else {
+                    holder.favIcon.clearColorFilter();
+                }
+            }
+        });
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -40,7 +52,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             }
         });
         if (channel.isFavorite()) {
-            holder.favIcon.setColorFilter(Color.argb(255, 255, 255, 255));
+            holder.favIcon.setColorFilter(Color.YELLOW);
         } else {
             holder.favIcon.clearColorFilter();
         }

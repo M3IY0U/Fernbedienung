@@ -3,6 +3,7 @@ package com.sundeep.timo.fernbedienung;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -190,6 +191,18 @@ public class MainActivity extends AppCompatActivity {
     public void channelSearch(MenuItem m) {
         reqA = new HttpRequestAsync();
         reqA.execute("scanChannels=");
+        Data.getInstance().save(this);
+    }
+
+    public void toggleFavorite(View v){
+        ImageButton btn = findViewById(R.id.favButton);
+        Data.getInstance().getCurrentChannel().setFavorited(!Data.getInstance().getCurrentChannel().isFavorite());
+        if(Data.getInstance().getCurrentChannel().isFavorite()){
+            btn.setColorFilter(Color.YELLOW);
+        }
+        else {
+            btn.clearColorFilter();
+        }
     }
 
 
@@ -217,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
         if (Data.getInstance().getNextChannel() != null) {
             reqA = new HttpRequestAsync();
             reqA.execute("channelMain=" + Data.getInstance().getNextChannel().getChannel());
+            updateChannelText();
         }
     }
 
@@ -224,6 +238,7 @@ public class MainActivity extends AppCompatActivity {
         if (Data.getInstance().getPreviousChannel() != null) {
             reqA = new HttpRequestAsync();
             reqA.execute("channelMain=" + Data.getInstance().getPreviousChannel().getChannel());
+            updateChannelText();
         }
     }
 
@@ -291,6 +306,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             currentChannel.setText("Kein Kanal gewählt");
         }
+    }
+    private void updateFavButton(){
+
     }
 
     public static void expand(final View view, int durationMultiplier) {

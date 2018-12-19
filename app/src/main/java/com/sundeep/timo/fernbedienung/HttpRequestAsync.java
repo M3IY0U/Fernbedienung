@@ -1,5 +1,7 @@
 package com.sundeep.timo.fernbedienung;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
@@ -13,7 +15,7 @@ public class HttpRequestAsync extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... strings) {
         HttpRequest req = new HttpRequest(Data.getInstance().getIp(), "8080", 25000, false);
-        if (strings[0].equals("scanChannels")) {
+        if (strings[0].equals("scanChannels=")) {
             JSONObject response;
             try {
                 response = req.sendHttp("scanChannels=");
@@ -29,7 +31,7 @@ public class HttpRequestAsync extends AsyncTask<String, Void, Void> {
                     channel.setQuality(jsonChannel.getInt("quality"));
                     boolean dupe = false;
                     for (int j = 0; j < channelArrayList.size(); ++j) {
-                        if (channel.getProgram() == channelArrayList.get(j).getProgram()) {
+                        if (channel.getProgram().equals(channelArrayList.get(j).getProgram())) {
                             dupe = true;
                             if (channelArrayList.get(j).getQuality() < channel.getQuality()) {
                                 channelArrayList.set(j, channel);
