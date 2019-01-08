@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     static TextView currentChannel;
     ImageButton muteButton;
     ImageButton pauseButton;
+    static ImageButton favButton;
     HttpRequestAsync reqA;
 
     @Override
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         volumeDisplay = (TextView) findViewById(R.id.volumeDisplay);
         muteButton = (ImageButton) findViewById(R.id.muteButton);
         currentChannel = findViewById(R.id.currentChannel);
+        favButton = findViewById(R.id.favButton);
         pauseButton = (ImageButton) findViewById(R.id.pauseButton);
         updateVolumeText();
         updateChannelText();
@@ -60,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
                 Data.getInstance().setMuted(false);
                 muteButton.setImageResource(R.drawable.ic_volume_up_black_24dp);
                 updateVolumeText();
+                reqA = new HttpRequestAsync();
+                reqA.execute("volume=" + Integer.toString(Data.getInstance().getVolume()));
             }
 
             @Override
@@ -69,8 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                reqA = new HttpRequestAsync();
-                reqA.execute("volume=" + Integer.toString(Data.getInstance().getVolume()));
+
             }
         });
     }
@@ -86,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         Data.getInstance().restore(this);
         volumeBar.setProgress(Data.getInstance().getVolume());
         updateVolumeText();
+        updateFavButton();
         super.onResume();
     }
 
@@ -166,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         b.setTitle("Bitte tragen sie eine gültige IP ein");
         final EditText input = new EditText(this);
         b.setView(input);
+        input.setInputType(InputType.TYPE_CLASS_PHONE);
         input.setText(Data.getInstance().getIp());
         b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -203,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
         else {
             btn.clearColorFilter();
         }
+        updateFavButton();
     }
 
 
@@ -231,6 +238,7 @@ public class MainActivity extends AppCompatActivity {
             reqA = new HttpRequestAsync();
             reqA.execute("channelMain=" + Data.getInstance().getNextChannel().getChannel());
             updateChannelText();
+            updateFavButton();
         }
     }
 
@@ -239,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
             reqA = new HttpRequestAsync();
             reqA.execute("channelMain=" + Data.getInstance().getPreviousChannel().getChannel());
             updateChannelText();
+            updateFavButton();
         }
     }
 
@@ -307,8 +316,14 @@ public class MainActivity extends AppCompatActivity {
             currentChannel.setText("Kein Kanal gewählt");
         }
     }
-    private void updateFavButton(){
-
+    public static void updateFavButton(){
+        if(Data.getInstance().getCurrentChannel()!=null){
+            if(Data.getInstance().getCurrentChannel().isFavorite()){
+                favButton.setColorFilter(Color.YELLOW);
+            }else{
+                favButton.clearColorFilter();
+            }
+        }
     }
 
     public static void expand(final View view, int durationMultiplier) {

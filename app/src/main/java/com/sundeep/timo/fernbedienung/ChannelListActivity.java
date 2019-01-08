@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ChannelListActivity extends AppCompatActivity {
 
@@ -25,8 +26,9 @@ public class ChannelListActivity extends AppCompatActivity {
         channelLayoutManager = new LinearLayoutManager(this);
         channelLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         channelRecyclerView.setLayoutManager(channelLayoutManager);
-
-        channelAdapter = new ChannelAdapter(new ArrayList<Channel>(Data.getInstance().getChannels()));
+        ArrayList<Channel> temp = new ArrayList<Channel>(Data.getInstance().getChannels());
+        Collections.sort(temp,Collections.<Channel>reverseOrder(new com.sundeep.timo.fernbedienung.ChannelComparator()));
+        channelAdapter = new ChannelAdapter(temp);
         channelRecyclerView.setAdapter(channelAdapter);
     }
 
@@ -39,6 +41,10 @@ public class ChannelListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         Data.getInstance().restore(this);
+        ArrayList<Channel> t = new ArrayList<Channel>(Data.getInstance().getChannels());
+        Collections.sort(t, Collections.reverseOrder(new com.sundeep.timo.fernbedienung.ChannelComparator()));
+        channelAdapter = new ChannelAdapter(t);
+        channelRecyclerView.setAdapter(channelAdapter);
         super.onResume();
     }
 }

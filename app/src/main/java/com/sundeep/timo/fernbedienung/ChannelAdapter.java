@@ -34,12 +34,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         holder.favIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                channel.setFavorited(!channel.isFavorite());
                 if (!channel.isFavorite()) {
                     holder.favIcon.setColorFilter(Color.YELLOW);
                 }else {
                     holder.favIcon.clearColorFilter();
                 }
+                //channel.setFavorited(!channel.isFavorite());
+
             }
         });
         holder.itemView.setOnClickListener(new View.OnClickListener() {

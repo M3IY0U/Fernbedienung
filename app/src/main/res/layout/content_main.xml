@@ -33,8 +33,7 @@
         android:id="@+id/currentChannel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="AAAAAAAAAAAAAAAAAA"
-        android:textSize="28dp"
+        android:textSize="28sp"
         android:textAlignment="center"
         android:textColor="@color/colorTextLight"
         android:layout_weight="0.2"
@@ -80,29 +79,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="bottom"
-        android:padding="10dp">
-
-
-        <ImageButton
-            android:id="@+id/ratioLister"
-            android:onClick="toggleRatios"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="@drawable/button_round_blurple"
-            android:layout_margin="5dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_aspect_ratio_black_24dp"
-            />
+        android:gravity="bottom">
         <LinearLayout
-            android:paddingStart="15dp"
-            android:paddingEnd="0dp"
             android:id="@+id/ratioButtons"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:visibility="gone">
+            android:gravity="center"
+            android:layout_marginBottom="15dp">
 
             <ImageButton
                 android:id="@+id/ratioC"
@@ -118,7 +102,8 @@
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:background="@drawable/button_rounded_square_blurple"
-                android:layout_margin="32dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
                 android:backgroundTint="@color/colorPrimaryDark"
                 android:src="@drawable/baseline_tv_black_48"
                 android:onClick="ratio16to9"
@@ -153,7 +138,7 @@
 <LinearLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingBottom="50dp"
+    android:paddingBottom="30dp"
     android:layout_margin="5dp"
     android:layout_gravity="center"
     >
@@ -224,7 +209,7 @@
             android:fadingEdge="horizontal"
             android:progressDrawable="@drawable/seekbar_background"
             android:maxHeight="10dp"
-            />
+            tools:targetApi="o" />
         <TextView
             android:id="@+id/volumeDisplay"
             android:layout_width="30dp"
