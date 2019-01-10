@@ -5,32 +5,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.SystemClock;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.Transformation;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.sql.Time;
 
 public class MainActivity extends AppCompatActivity {
     SeekBar volumeBar;
@@ -40,21 +29,23 @@ public class MainActivity extends AppCompatActivity {
     ImageButton pauseButton;
     static ImageButton favButton;
     HttpRequestAsync reqA;
-
+    Time time = new Time(0);
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        volumeDisplay = (TextView) findViewById(R.id.volumeDisplay);
-        muteButton = (ImageButton) findViewById(R.id.muteButton);
+        volumeDisplay = findViewById(R.id.volumeDisplay);
+        muteButton = findViewById(R.id.muteButton);
         currentChannel = findViewById(R.id.currentChannel);
         favButton = findViewById(R.id.favButton);
-        pauseButton = (ImageButton) findViewById(R.id.pauseButton);
+        pauseButton = findViewById(R.id.pauseButton);
         updateVolumeText();
         updateChannelText();
-        volumeBar = (SeekBar) findViewById(R.id.volumeBar);
+        updateFavButton();
+        volumeBar = findViewById(R.id.volumeBar);
         //volumeBar.setLayoutParams(new LinearLayout.LayoutParams(this.getResources().getDisplayMetrics().widthPixels/2,25));
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -152,13 +143,15 @@ public class MainActivity extends AppCompatActivity {
         Context context = getApplicationContext();
         CharSequence text;
         if (!Data.getInstance().isPaused()) {
+            time.setTime(SystemClock.elapsedRealtime());
             pauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
-            text = "Programm wurde pausiert!";
+            text = "Programm wurde pausiert! ";
             reqA.execute("timeShiftPause=");
+
         } else {
             pauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
-            text = "Programm wird fortgesetzt!";
-            reqA.execute("timeShiftPlay=0"); //Keine Ahnung wie das genau sein muss
+            text = "Programm wird fortgesetzt! ";
+            reqA.execute("timeShiftPlay=" + Math.round(SystemClock.elapsedRealtime() - time.getTime())/1000);
         }
         Data.getInstance().togglePause();
         Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
@@ -188,6 +181,9 @@ public class MainActivity extends AppCompatActivity {
         String command = "standby=1";
         if (Data.getInstance().isOn()) {
             command = "standby=0";
+            pwrbtn.setColorFilter(Color.GREEN);
+        }else {
+            pwrbtn.clearColorFilter();
         }
         reqA = new HttpRequestAsync();
         reqA.execute(command);
@@ -221,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
             reqA = new HttpRequestAsync();
             reqA.execute("channelPip="+Data.getInstance().getCurrentChannel().getChannel());
             reqA =  new HttpRequestAsync();
-            if(Data.getInstance().getRatio()!="16:9"){
+            if(!Data.getInstance().getRatio().equals("16:9")){
                 reqA.execute("zoomPip=1");
             }else{
                 reqA.execute("zoomPip=0");
@@ -295,14 +291,6 @@ public class MainActivity extends AppCompatActivity {
         Data.getInstance().reset();
     }
 
-    public void toggleRatios(View v) {
-        LinearLayout ratios = findViewById(R.id.ratioButtons);
-        if (ratios.getVisibility() == View.GONE) {
-            expand(ratios, 1);
-        } else {
-            collapse(ratios, 1);
-        }
-    }
 
 
     private void updateVolumeText() {
@@ -313,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
         if (Data.getInstance().getCurrentChannel() != null) {
             currentChannel.setText(Data.getInstance().getCurrentChannel().getProgram());
         } else {
-            currentChannel.setText("Kein Kanal gewählt");
+            currentChannel.setText(R.string.no_channel);
         }
     }
     public static void updateFavButton(){
@@ -323,60 +311,9 @@ public class MainActivity extends AppCompatActivity {
             }else{
                 favButton.clearColorFilter();
             }
+        }else{
+            favButton.clearColorFilter();
         }
-    }
 
-    public static void expand(final View view, int durationMultiplier) {
-        if (view.getVisibility() == View.GONE) {
-
-            view.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            final int targetWidth = view.getMeasuredWidth();
-            view.getLayoutParams().width = 1;
-            view.setVisibility(View.VISIBLE);
-            Animation a = new Animation() {
-
-                @Override
-                protected void applyTransformation(float interpolatedTime, Transformation t) {
-                    view.getLayoutParams().width = (int) (targetWidth * interpolatedTime);
-                    view.requestLayout();
-                }
-
-                @Override
-                public boolean willChangeBounds() {
-                    return true;
-                }
-            };
-
-            a.setDuration(((int) (targetWidth / view.getContext().getResources().getDisplayMetrics().density)) * durationMultiplier);
-            view.startAnimation(a);
-        }
-    }
-
-    public static void collapse(final View view, int durationMultiplier) {
-        if (view.getVisibility() == View.VISIBLE) {
-
-
-            final int initialWidth = view.getMeasuredWidth();
-            Animation a = new Animation() {
-
-                @Override
-                protected void applyTransformation(float interpolatedTime, Transformation t) {
-                    if (interpolatedTime == 1) {
-                        view.setVisibility(View.GONE);
-                    } else {
-                        view.getLayoutParams().width = initialWidth - (int) (initialWidth * interpolatedTime);
-                        view.requestLayout();
-                    }
-                }
-
-                @Override
-                public boolean willChangeBounds() {
-                    return true;
-                }
-            };
-
-            a.setDuration(((int) (initialWidth / view.getContext().getResources().getDisplayMetrics().density)) * durationMultiplier);
-            view.startAnimation(a);
-        }
     }
 }

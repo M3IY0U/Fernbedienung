@@ -1,7 +1,6 @@
 package com.sundeep.timo.fernbedienung;
 
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> {
     private ArrayList<Channel> dataSet;
 
-    public ChannelAdapter(ArrayList<Channel> dataSet) {
+    ChannelAdapter(ArrayList<Channel> dataSet) {
         this.dataSet = dataSet;
     }
 
@@ -39,8 +38,12 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 }else {
                     holder.favIcon.clearColorFilter();
                 }
-                //channel.setFavorited(!channel.isFavorite());
-
+                for(int i=0;i<Data.getInstance().getChannels().size();i++){
+                    if(Data.getInstance().getChannels().get(i).getChannel().equals(channel.getChannel())){
+                        Data.getInstance().getChannels().get(i).setFavorited(!Data.getInstance().getChannels().get(i).isFavorite());
+                        notifyDataSetChanged();
+                    }
+                }
             }
         });
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -64,14 +67,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         return dataSet.size();
     }
 
-    public static class ChannelViewHolder extends RecyclerView.ViewHolder {
-        public ImageView favIcon;
-        public TextView channelName;
+    static class ChannelViewHolder extends RecyclerView.ViewHolder {
+        ImageView favIcon;
+        TextView channelName;
 
-        public ChannelViewHolder(View itemView) {
+        ChannelViewHolder(View itemView) {
             super(itemView);
-            favIcon = (ImageView) itemView.findViewById(R.id.recyclerview_item_channel_fav_icon);
-            channelName = (TextView) itemView.findViewById(R.id.recyclerview_item_channel_name);
+            favIcon = itemView.findViewById(R.id.recyclerview_item_channel_fav_icon);
+            channelName = itemView.findViewById(R.id.recyclerview_item_channel_name);
         }
     }
 }
