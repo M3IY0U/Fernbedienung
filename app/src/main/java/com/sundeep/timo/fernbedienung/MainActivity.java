@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         updateChannelText();
         updateFavButton();
         volumeBar = findViewById(R.id.volumeBar);
-        //volumeBar.setLayoutParams(new LinearLayout.LayoutParams(this.getResources().getDisplayMetrics().widthPixels/2,25));
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -82,6 +81,23 @@ public class MainActivity extends AppCompatActivity {
         volumeBar.setProgress(Data.getInstance().getVolume());
         updateVolumeText();
         updateFavButton();
+        if(!Data.getInstance().isSetup()) {
+            Data.getInstance().setSetup(true);
+            AlertDialog.Builder b = new AlertDialog.Builder(this);
+            b.setTitle("Bitte tragen sie eine gültige IP ein");
+            final EditText input = new EditText(this);
+            b.setView(input);
+            input.setInputType(InputType.TYPE_CLASS_PHONE);
+            input.setText(Data.getInstance().getIp());
+            b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Data.getInstance().setIp(input.getText().toString());
+                }
+            });
+            b.setNegativeButton("CANCEL", null);
+            b.show();
+        }
         super.onResume();
     }
 

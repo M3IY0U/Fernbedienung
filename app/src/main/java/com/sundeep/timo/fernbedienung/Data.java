@@ -27,6 +27,9 @@ public class Data {
     private Channel pictureInPictureChannel;
     private String ratio = "16:9";
 
+
+
+    boolean setup = false;
     private int currentChannelIndex = -1;
 
 
@@ -39,11 +42,13 @@ public class Data {
         editor.putInt("currentChannelIndex", currentChannelIndex);
         editor.putBoolean("muted", muted);
         editor.putString("channels",toJson(channels));
+        editor.putBoolean("setup", setup);
         editor.commit();
     }
 
     public void restore(Context context){
         SharedPreferences sP = context.getSharedPreferences(context.getString(R.string.preferences), Context.MODE_PRIVATE);
+        setup = sP.getBoolean("setup",false);
         volume = sP.getInt("volume",50);
         on = sP.getBoolean("on",false);
         ip = sP.getString("ip","");
@@ -61,6 +66,7 @@ public class Data {
         currentChannelIndex = -1;
         channels = null;
         pictureInPictureChannel = null;
+        setup=false;
     }
 
 
@@ -150,6 +156,13 @@ public class Data {
     }
     public void setCurrentChannelIndex(int currentChannelIndex) {
         this.currentChannelIndex = currentChannelIndex;
+    }
+
+    public boolean isSetup() {
+        return setup;
+    }
+    public void setSetup(boolean setup) {
+        this.setup = setup;
     }
     public boolean isOn() {
         return on;
