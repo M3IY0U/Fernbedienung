@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         updateVolumeText();
         updateFavButton();
         if(!Data.getInstance().isSetup()) {
-            Data.getInstance().setSetup(true);
             AlertDialog.Builder b = new AlertDialog.Builder(this);
             b.setTitle("Bitte tragen sie eine gültige IP ein");
             final EditText input = new EditText(this);
@@ -93,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Data.getInstance().setIp(input.getText().toString());
+                    Data.getInstance().setSetup(true);
                 }
             });
             b.setNegativeButton("CANCEL", null);

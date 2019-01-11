@@ -15,7 +15,6 @@ public class Data {
 
     }
 
-
     private String ip;
     private boolean muted = false;
     private static final Data ourInstance = new Data();
@@ -26,7 +25,6 @@ public class Data {
     private ArrayList<Channel> channels;
     private Channel pictureInPictureChannel;
     private String ratio = "16:9";
-
 
 
     boolean setup = false;
