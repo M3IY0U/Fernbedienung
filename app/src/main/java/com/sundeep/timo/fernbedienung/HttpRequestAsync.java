@@ -1,8 +1,7 @@
 package com.sundeep.timo.fernbedienung;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +13,11 @@ import java.util.ArrayList;
 public class HttpRequestAsync extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... strings) {
+        if(!MainActivity.checkIp()){
+            Log.d("HTTPREQUEST", "IP ADRESSE NICHT VALID");
+            return null;
+        }
+
         HttpRequest req = new HttpRequest(Data.getInstance().getIp(), "8080", 25000, false);
         if (strings[0].equals("scanChannels=")) {
             JSONObject response;
@@ -43,17 +47,13 @@ public class HttpRequestAsync extends AsyncTask<String, Void, Void> {
                 }
                 Data.getInstance().setChannels(channelArrayList);
                 Data.getInstance().setCurrentChannelIndex(0);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         } else {
             try {
                 req.sendHttp(strings[0]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         }

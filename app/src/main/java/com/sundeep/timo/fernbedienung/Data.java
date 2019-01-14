@@ -27,11 +27,10 @@ public class Data {
     private String ratio = "16:9";
 
 
-    boolean setup = false;
     private int currentChannelIndex = -1;
 
 
-    public void save(Context context){
+    void save(Context context){
         SharedPreferences sP = context.getSharedPreferences(context.getString(R.string.preferences),Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sP.edit();
         editor.putInt("volume", volume);
@@ -40,13 +39,11 @@ public class Data {
         editor.putInt("currentChannelIndex", currentChannelIndex);
         editor.putBoolean("muted", muted);
         editor.putString("channels",toJson(channels));
-        editor.putBoolean("setup", setup);
-        editor.commit();
+        editor.apply();
     }
 
-    public void restore(Context context){
+    void restore(Context context){
         SharedPreferences sP = context.getSharedPreferences(context.getString(R.string.preferences), Context.MODE_PRIVATE);
-        setup = sP.getBoolean("setup",false);
         volume = sP.getInt("volume",50);
         on = sP.getBoolean("on",false);
         ip = sP.getString("ip","");
@@ -56,15 +53,14 @@ public class Data {
         channels = channels != null ? channels : new ArrayList<Channel>();
     }
 
-    public void reset(){
-        ip=null;
+    void reset(){
+        ip="";
         muted = false;
         volume =0;
         paused = false;
         currentChannelIndex = -1;
-        channels = null;
+        channels.clear();
         pictureInPictureChannel = null;
-        setup=false;
     }
 
 
@@ -95,7 +91,7 @@ public class Data {
     }
 
 
-    public Channel getPreviousChannel() {
+     Channel getPreviousChannel() {
         if(currentChannelIndex < 0) {
             return null;
         }
@@ -105,14 +101,14 @@ public class Data {
         return channels.get(currentChannelIndex);
     }
 
-    public Channel getCurrentChannel() {
+     Channel getCurrentChannel() {
         if(currentChannelIndex < 0) {
             return null;
         }
         return channels.get(currentChannelIndex);
     }
 
-    public void setCurrentChannel(String c){
+     void setCurrentChannel(String c){
         String test;
         for(int i =0;i<channels.size();i++){
             test = channels.get(i).getChannel();
@@ -124,7 +120,7 @@ public class Data {
     }
 
 
-    public Channel getNextChannel() {
+     Channel getNextChannel() {
         if(currentChannelIndex < 0) {
             return null;
         }
@@ -136,69 +132,63 @@ public class Data {
 
 
 
-    public ArrayList<Channel> getChannels() {
+     ArrayList<Channel> getChannels() {
         return channels;
     }
-    public void setChannels(ArrayList<Channel> channels) {
+     void setChannels(ArrayList<Channel> channels) {
         this.channels = channels;
     }
     @Nullable
-    public Channel getPictureInPictureChannel() {
+     Channel getPictureInPictureChannel() {
         return pictureInPictureChannel;
     }
-    public void setPictureInPictureChannel(@Nullable Channel pictureInPictureChannel) {
+     void setPictureInPictureChannel(@Nullable Channel pictureInPictureChannel) {
         this.pictureInPictureChannel = pictureInPictureChannel;
     }
-    public int getCurrentChannelIndex() {
+     int getCurrentChannelIndex() {
         return currentChannelIndex;
     }
-    public void setCurrentChannelIndex(int currentChannelIndex) {
+     void setCurrentChannelIndex(int currentChannelIndex) {
         this.currentChannelIndex = currentChannelIndex;
     }
 
-    public boolean isSetup() {
-        return setup;
-    }
-    public void setSetup(boolean setup) {
-        this.setup = setup;
-    }
-    public boolean isOn() {
+     boolean isOn() {
         return on;
     }
-    public void setOn(boolean on) {
+     void setOn(boolean on) {
         this.on = on;
     }
-    public boolean isPaused() {
+     boolean isPaused() {
         return paused;
     }
-    public void setPaused(boolean paused) {
+     void setPaused(boolean paused) {
         this.paused = paused;
     }
-    public int getPreMuteVolume() {
+    int getPreMuteVolume() {
         return preMuteVolume;
     }
-    public int getVolume() {
+     int getVolume() {
         return volume;
     }
-    public void setVolume(int volume) {
+     void setVolume(int volume) {
         this.volume = volume;
     }
-    public boolean isMuted() {
+     boolean isMuted() {
         return muted;
     }
-    public void setMuted(boolean muted) {
+     void setMuted(boolean muted) {
         this.muted = muted;
     }
-    public static Data getInstance() {
+     static Data getInstance() {
         return ourInstance;
     }
-    public String getIp() {
+     String getIp() {
         return ip;
     }
-    public void setIp(String ip) {
+     void setIp(String ip) {
         this.ip = ip;
     }
-    public void toggleMute(){
+     void toggleMute(){
         if(muted){
             muted= false;
             volume=preMuteVolume;
@@ -208,18 +198,14 @@ public class Data {
             volume=0;
         }
     }
-    public void togglePause(){
-        if(paused){
-            paused=false;
-        }else{
-            paused=true;
-        }
+     void togglePause(){
+         paused = !paused;
 
     }
-    public String getRatio() {
+     String getRatio() {
         return ratio;
     }
-    public void setRatio(String ratio) {
+     void setRatio(String ratio) {
         this.ratio = ratio;
     }
 }

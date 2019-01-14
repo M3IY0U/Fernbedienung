@@ -1,6 +1,5 @@
 package com.sundeep.timo.fernbedienung;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -20,6 +19,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.sql.Time;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     SeekBar volumeBar;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton muteButton;
     ImageButton pauseButton;
     static ImageButton favButton;
+    ImageButton pwrbtn;
     HttpRequestAsync reqA;
     Time time = new Time(0);
     
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         muteButton = findViewById(R.id.muteButton);
         currentChannel = findViewById(R.id.currentChannel);
         favButton = findViewById(R.id.favButton);
+        pwrbtn = findViewById(R.id.powerButton);
         pauseButton = findViewById(R.id.pauseButton);
         updateVolumeText();
         updateChannelText();
@@ -49,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(!checkIp()){
+                    Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+                    toast.show();
+                    return;
+                }
                 Data.getInstance().setVolume(progress);
                 Data.getInstance().setMuted(false);
                 muteButton.setImageResource(R.drawable.ic_volume_up_black_24dp);
@@ -78,10 +86,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         Data.getInstance().restore(this);
-        volumeBar.setProgress(Data.getInstance().getVolume());
         updateVolumeText();
         updateFavButton();
-        if(!Data.getInstance().isSetup()) {
+        updateChannelText();
+        updatePowerButton();
+        if(!checkIp()) {
             AlertDialog.Builder b = new AlertDialog.Builder(this);
             b.setTitle("Bitte tragen sie eine gültige IP ein");
             final EditText input = new EditText(this);
@@ -92,12 +101,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Data.getInstance().setIp(input.getText().toString());
-                    Data.getInstance().setSetup(true);
+                    Data.getInstance().save(getApplicationContext());
                 }
             });
             b.setNegativeButton("CANCEL", null);
             b.show();
         }
+        volumeBar.setProgress(Data.getInstance().getVolume());
         super.onResume();
     }
 
@@ -124,6 +134,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void toggleMute(View v) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         Data.getInstance().toggleMute();
         reqA = new HttpRequestAsync();
         if (Data.getInstance().isMuted()) {
@@ -138,11 +153,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void killTv(MenuItem m) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         reqA = new HttpRequestAsync();
         reqA.execute("powerOff=");
     }
 
     public void toggleDebug(MenuItem m) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         reqA = new HttpRequestAsync();
         if (m.isChecked()) {
             reqA.execute("debug=0");
@@ -155,8 +180,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void togglePause(View v) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         reqA = new HttpRequestAsync();
-        Context context = getApplicationContext();
         CharSequence text;
         if (!Data.getInstance().isPaused()) {
             time.setTime(SystemClock.elapsedRealtime());
@@ -170,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             reqA.execute("timeShiftPlay=" + Math.round(SystemClock.elapsedRealtime() - time.getTime())/1000);
         }
         Data.getInstance().togglePause();
-        Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+        Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
     }
 
@@ -193,26 +222,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void togglePower(View v) {
-        ImageButton pwrbtn = findViewById(R.id.powerButton);
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
         String command = "standby=1";
         if (Data.getInstance().isOn()) {
             command = "standby=0";
-            pwrbtn.setColorFilter(Color.GREEN);
-        }else {
-            pwrbtn.clearColorFilter();
         }
+        updatePowerButton();
         reqA = new HttpRequestAsync();
         reqA.execute(command);
         Data.getInstance().setOn(!Data.getInstance().isOn());
     }
 
     public void channelSearch(MenuItem m) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         reqA = new HttpRequestAsync();
         reqA.execute("scanChannels=");
         Data.getInstance().save(this);
     }
 
     public void toggleFavorite(View v){
+        if(Data.getInstance().getChannels().size()==0){
+            Toast toast = Toast.makeText(this, "Es wurde noch kein erfolgreicher Channel Scan durchgeführt", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         ImageButton btn = findViewById(R.id.favButton);
         Data.getInstance().getCurrentChannel().setFavorited(!Data.getInstance().getCurrentChannel().isFavorite());
         if(Data.getInstance().getCurrentChannel().isFavorite()){
@@ -226,6 +268,16 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void togglePip(View v){
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+        if(Data.getInstance().getChannels().size()==0){
+            Toast toast = Toast.makeText(this, "Es wurde noch kein erfolgreicher Channel Scan durchgeführt", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         reqA = new HttpRequestAsync();
         if(Data.getInstance().getPictureInPictureChannel()==null){
             Data.getInstance().setPictureInPictureChannel(Data.getInstance().getCurrentChannel());
@@ -246,6 +298,16 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void nextChannel(View view) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+        if (Data.getInstance().getChannels().size()==0 || Data.getInstance().getChannels() == null) {
+            Toast toast = Toast.makeText(getApplicationContext(), "Es wurde noch kein erfolgreicher Channelscan durchgeführt!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         if (Data.getInstance().getNextChannel() != null) {
             reqA = new HttpRequestAsync();
             reqA.execute("channelMain=" + Data.getInstance().getNextChannel().getChannel());
@@ -255,6 +317,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void prevChannel(View view) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+        if (Data.getInstance().getChannels().size()==0 || Data.getInstance().getChannels() == null) {
+            Toast toast = Toast.makeText(getApplicationContext(), "Es wurde noch kein erfolgreicher Channelscan durchgeführt!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         if (Data.getInstance().getPreviousChannel() != null) {
             reqA = new HttpRequestAsync();
             reqA.execute("channelMain=" + Data.getInstance().getPreviousChannel().getChannel());
@@ -264,13 +336,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startChannelList(View v) {
-        if (Data.getInstance().getChannels() == null) {
-            Data.getInstance().togglePause();
-            Toast toast = Toast.makeText(getApplicationContext(), "Es wurde noch kein Channelscan durchgeführt!", Toast.LENGTH_SHORT);
+        if (Data.getInstance().getChannels().size()==0 || Data.getInstance().getChannels() == null) {
+            Toast toast = Toast.makeText(getApplicationContext(), "Es wurde noch kein erfolgreicher Channelscan durchgeführt!", Toast.LENGTH_SHORT);
             toast.show();
             return;
         }
-
         Intent i = new Intent(
                 this,
                 ChannelListActivity.class
@@ -279,6 +349,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ratioCinema(View v) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         if (!Data.getInstance().getRatio().equals("2.35:1")) {
             reqA = new HttpRequestAsync();
             Data.getInstance().setRatio("2.35:1");
@@ -287,6 +362,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ratio4to3(View v) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         if (!Data.getInstance().getRatio().equals("4:3")) {
             reqA = new HttpRequestAsync();
             Data.getInstance().setRatio("4:3");
@@ -295,6 +375,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ratio16to9(View v) {
+        if(!checkIp()){
+            Toast toast = Toast.makeText(getApplicationContext(), "Keine gültige IP eingetragen!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         if (!Data.getInstance().getRatio().equals("16:9")) {
             reqA = new HttpRequestAsync();
             Data.getInstance().setRatio("16:9");
@@ -305,9 +390,18 @@ public class MainActivity extends AppCompatActivity {
 
     public void reset(MenuItem m) {
         Data.getInstance().reset();
+        Data.getInstance().save(this);
+        finish();
+        startActivity(getIntent());
     }
 
-
+    private void updatePowerButton(){
+        if(Data.getInstance().isOn()){
+            pwrbtn.setColorFilter(Color.GREEN);
+        }else {
+            pwrbtn.clearColorFilter();
+        }
+    }
 
     private void updateVolumeText() {
         volumeDisplay.setText(Integer.toString(Data.getInstance().getVolume()));
@@ -332,4 +426,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    public static boolean checkIp(){
+        if(Data.getInstance().getIp().isEmpty() || Data.getInstance().getIp().equals("") || Data.getInstance().getIp() == null)
+            return false;
+
+        final String IPADDRESS_PATTERN =
+                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+        Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
+        Matcher matcher;
+        matcher = pattern.matcher(Data.getInstance().getIp());
+        return matcher.matches();
+    }
+
 }
